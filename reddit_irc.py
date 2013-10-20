@@ -49,7 +49,7 @@ class RedditBot(bot.SimpleBot):
 
 
 class RedditUpdater(object):
-    MSG_FORMAT = '%s New post to /r/%s by %s: %s'
+    MSG_FORMAT = '{author} made a new post to /r/{subreddit}: "{title}" {link}'
     MSG_LIMIT = 3
     class_reddit = None
 
@@ -81,10 +81,11 @@ class RedditUpdater(object):
             submissions = submissions[-self.MSG_LIMIT:]
         self.previous = submissions[0]
         for submission in reversed(submissions):
-            msg = (self.MSG_FORMAT % (submission.short_link,
-                                      text_type(submission.subreddit),
-                                      text_type(submission.author),
-                                      submission.title)).encode('utf-8')
+            msg = self.MSG_FORMAT.format(
+                author=text_type(submission.author),
+                subreddit=text_type(submission.subreddit),
+                title=submission.title,
+                link=submission.short_link).encode('utf-8')
             msg = re.sub('\s+', ' ', msg).strip()
             if debug:
                 print(msg)
@@ -93,7 +94,7 @@ class RedditUpdater(object):
 
 
 class Runner(object):
-    CHECK_TIME = 30
+    CHECK_TIME = 60 # Check every minute
 
     def __init__(self):
         self.bots = {}
